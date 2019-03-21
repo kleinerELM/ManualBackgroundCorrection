@@ -39,6 +39,26 @@ public class ManualBackgroundCorrection extends PlugInTool {
 		return (int)(sx/magnification);
 	}
 
+	private void resetColorSpecimenArray() {
+		// initiating or resetting colorSpecimenArray
+		for ( int i = 0; i < columns; i++ ) {
+			for ( int j = 0; j < rows; j++ ) {
+				colorSpecimenArray[i][j] = (double)-1;
+			}
+		}
+	}
+
+	private void getDarkestColor() {
+		minColor = 255;
+		for ( int i = 0; i < columns; i++ ) {
+			for ( int j = 0; j < rows; j++ ) {
+				if ( minColor > colorSpecimenArray[i][j] ) {
+					minColor = (int)colorSpecimenArray[i][j];
+				}
+			}
+		}
+	}
+
 	public void mousePressed(ImagePlus imp, MouseEvent e) {
 		//IJ.log("mouse pressed: "+e);
 		ImageWindow iw = imp.getWindow();
@@ -77,11 +97,7 @@ public class ManualBackgroundCorrection extends PlugInTool {
 				IJ.log( " select in all sectors a position which is supposed to be the same phase and grey value" );
 			}
 			lastImageTitle = imageTitle;
-			for ( int i = 0; i < columns; i++ ) {
-				for ( int j = 0; j < rows; j++ ) {
-					colorSpecimenArray[i][j] = (double)-1;
-				}
-			}
+			resetColorSpecimenArray();
 		}
 		
 		// calculating a mean value by using a 5 by 5 neighbourhood of the selected pixel
@@ -92,9 +108,6 @@ public class ManualBackgroundCorrection extends PlugInTool {
 			for ( int j = -2; j < 2; j++ ) {
 				value = imp.getPixel( x+i, y+j ); // 4 element array - value[0] returns grayscale value
 				valueSum += value[0];
-				if ( minColor > value[0] ) {
-					minColor = value[0];
-				}
 				valCount++;
 			}
 		}
@@ -120,6 +133,7 @@ public class ManualBackgroundCorrection extends PlugInTool {
 		// calculate image correction if all measurements are present
 		if ( calcBackground ) {
 			IJ.log( " - calculating correction background!!" );
+			IJ.wait(10);
 			ImagePlus backgroundIMP = createBackgroundImage(imageTitle);
 			IJ.log( " - calculating corrected Image!!" );
 			createCorrectedImage(imageTitle, imp, backgroundIMP );
@@ -134,6 +148,8 @@ public class ManualBackgroundCorrection extends PlugInTool {
 		ImagePlus backgroundIMP = NewImage.createByteImage (title , width, height, 1, NewImage.FILL_WHITE);
 		
 		ImageProcessor backgroundIP = backgroundIMP.getProcessor();
+
+		getDarkestColor();
 		
 		int color, x, y, i, j;
 		//get width and heigt of a single sector
@@ -189,6 +205,7 @@ public class ManualBackgroundCorrection extends PlugInTool {
 		return true;
 	}
 	public void showOptionsDialog() {
-		IJ.log("icon double-clicked");
+		IJ.log(" - reset colorSpecimenArray!");
+		resetColorSpecimenArray();
 	}
 }
