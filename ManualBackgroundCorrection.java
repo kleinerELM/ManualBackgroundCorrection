@@ -16,8 +16,9 @@
 import ij.*;
 import ij.process.*;
 import ij.gui.*;
-import java.awt.*;
 import ij.plugin.tool.PlugInTool;
+import java.awt.*;
+import java.awt.geom.*;
 import java.awt.event.*;
 import java.util.Arrays;
 
@@ -26,7 +27,6 @@ public class ManualBackgroundCorrection extends PlugInTool {
 	// TODO make rows & columns user changable!
 	protected int rows = 3;
 	protected int columns = 3;
-	
 	protected double[][] colorSpecimenArray = new double[columns][rows];
 	protected double magnification;
 	protected int pipetteBorder = 2;
@@ -101,6 +101,7 @@ public class ManualBackgroundCorrection extends PlugInTool {
 			IJ.log( " Image dimensions: " + width + " x " + height + " px" );
 			IJ.log( " using " + columns + " x " + rows + " sectors" );
 			IJ.log( " sector dimensions: " + ((int)width/columns) + " x " + ((int)height/rows) + " px" );
+			drawGrid( imp );			
 			IJ.log( " !select in all sectors a position, which is supposed to be the same phase with the same grey value!" );
 		}
 		
@@ -292,6 +293,35 @@ public class ManualBackgroundCorrection extends PlugInTool {
 		IJ.selectWindow( title );
 		return true;
 	}
+
+	// source https://imagej.nih.gov/ij/plugins/download/Grid_Overlay.java
+	private void drawGrid(ImagePlus imp) {
+		GeneralPath path = new GeneralPath();
+		int width = imp.getWidth();
+		int height = imp.getHeight();
+		int tileWidth = (int)width/columns;
+		int tileHeight = (int)height/rows;
+		
+		float xoff=0;
+		while (true) { // draw vertical lines
+			if (xoff>=width) break;
+			path.moveTo(xoff, 0f);
+			path.lineTo(xoff, height);
+			xoff += tileWidth;
+		}
+		float yoff=0.0001f;
+		while (true) { // draw horizonal lines
+			if (yoff>=height) break;
+			path.moveTo(0f, yoff);
+			path.lineTo(width, yoff);
+			yoff += tileHeight;
+		}
+		if (path==null)
+			imp.setOverlay(null);
+		else
+			imp.setOverlay(path, Color.red, null);
+	}
+	
 	public void showOptionsDialog() {
 		IJ.log(" - reset Plugin!");
 		lastImageTitle = "";
