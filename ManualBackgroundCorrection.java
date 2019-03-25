@@ -21,6 +21,8 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.awt.event.*;
 import java.util.Arrays;
+import java.text.DecimalFormat;
+import java.math.RoundingMode;
 
 public class ManualBackgroundCorrection extends PlugInTool {
 
@@ -59,8 +61,9 @@ public class ManualBackgroundCorrection extends PlugInTool {
 	}
 
 	public void mousePressed(ImagePlus imp, MouseEvent e) {
-		//IJ.log("mouse pressed: "+e);
-		//ImageWindow iw = imp.getWindow();
+		DecimalFormat df = new DecimalFormat("#.00");
+		df.setRoundingMode(RoundingMode.CEILING);
+		
 		ImageCanvas ic = imp.getCanvas();
 		magnification = ic.getMagnification();
 		String imageTitle = imp.getTitle();
@@ -132,12 +135,21 @@ public class ManualBackgroundCorrection extends PlugInTool {
 				valCount++;
 			}
 		}
-		double meanValue = valueSum/valCount;
+		double meanValue = (double)valueSum/valCount;
+		// calculate stdDev
+		int stdDevSum = 0;
+		for ( int i = (-1*pipetteBorder); i < pipetteBorder; i++ ) {
+			for ( int j = (-1*pipetteBorder); j < pipetteBorder; j++ ) {
+				value = imp.getPixel( x+i, y+j ); // 4 element array - value[0] returns grayscale value
+				stdDevSum += Math.pow( (value[0] - meanValue) , 2);
+			}
+		}
+		double stdDev = Math.sqrt( stdDevSum / (valCount-1) );
 		
 		// set the mean color value o the colorSpecimenArray at the selected sector position
 		colorSpecimenArray[sectorPosX][sectorPosY] = meanValue;
 		
-		IJ.log( " - selected color " + meanValue + " at image position " + x + " x " + y + " in sektor " + (sectorPosX+1) + " x " + (sectorPosY+1));
+		IJ.log( " - selected color " + df.format(meanValue) + "+-" + df.format(stdDev) + " at image position " + x + " x " + y + " in sektor " + (sectorPosX+1) + " x " + (sectorPosY+1));
 
 		// check if still some measurements are missing
 		boolean calcBackground = true;
