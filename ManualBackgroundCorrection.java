@@ -1,6 +1,6 @@
 /*
 * Manual background correction tool
-* This tool helps correcting inhomogenious brightness
+* This tool helps correcting inhomogeneous brightness
 * distributions within a single SEM-image by selecting
 * the same phases at different image sections
 *
@@ -26,7 +26,7 @@ import java.math.RoundingMode;
 
 public class ManualBackgroundCorrection extends PlugInTool {
 
-	// TODO make rows & columns user changable!
+	// TODO make rows & columns user changeable!
 	protected int rows = 3;
 	protected int columns = 3;
 	protected double[][] colorSpecimenArray = new double[columns][rows];
@@ -78,7 +78,7 @@ public class ManualBackgroundCorrection extends PlugInTool {
 		if ( imageTitle != lastImageTitle ) {
 			IJ.log( "--------------------------------------------------------" );
 			if ( lastImageTitle != "" ) {
-				IJ.log( "Analysed Image has changed. Reset color selection..." );
+				IJ.log( "Analyzed Image has changed. Reset color selection..." );
 			} else {
 				IJ.log( "Started manual background correction tool." );
 
@@ -100,7 +100,7 @@ public class ManualBackgroundCorrection extends PlugInTool {
 			lastImageTitle = imageTitle;
 			resetColorSpecimenArray();
 
-			IJ.log( " Analysing '" + imageTitle + "' at magnification " + magnification + "x" );
+			IJ.log( " Analyzing '" + imageTitle + "' at magnification " + magnification + "x" );
 			IJ.log( " Image dimensions: " + width + " x " + height + " px" );
 			IJ.log( " using " + columns + " x " + rows + " sectors" );
 			IJ.log( " sector dimensions: " + ((int)width/columns) + " x " + ((int)height/rows) + " px" );
@@ -157,7 +157,7 @@ public class ManualBackgroundCorrection extends PlugInTool {
 		for ( int i = 0; i < columns; i++ ) {
 			for ( int j = 0; j < rows; j++ ) {
 				if ( colorSpecimenArray[i][j] == (double)-1 ) {
-					IJ.log( "    still missing some values! eg. sektor " + (i+1) + " x " + (j+1) );
+					IJ.log( "    still missing some values! eg. sector " + (i+1) + " x " + (j+1) );
 					calcBackground = false;
 					break outerloop;
 				}
