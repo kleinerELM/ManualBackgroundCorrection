@@ -20,13 +20,13 @@ import ij.plugin.tool.PlugInTool;
 import java.awt.*;
 import java.awt.geom.*;
 import java.awt.event.*;
+import java.awt.Dialog;
 import java.util.Arrays;
 import java.text.DecimalFormat;
 import java.math.RoundingMode;
 
-public class ManualBackgroundCorrection extends PlugInTool {
+public class Manual_Background_Correction extends PlugInTool {
 
-	// TODO make rows & columns user changeable!
 	protected int rows = 3;
 	protected int columns = 3;
 	protected double[][] colorSpecimenArray = new double[columns][rows];
@@ -164,18 +164,19 @@ public class ManualBackgroundCorrection extends PlugInTool {
 			}
 		}
 
+		updateBackgroundPreviewImage( );
+		
 		// calculate image correction if all measurements are present
 		if ( calcBackground ) {
-			IJ.log( " - calculating correction background!!" );
-			IJ.wait(10);
-			ImagePlus backgroundIMP = createBackgroundImage( imageTitle );
-			IJ.log( " - calculating corrected Image!!" );
-			createCorrectedImage(imageTitle, imp, backgroundIMP );
-			IJ.log( " - Plugin is done. You still can change selections to optimize the result." );
-		} else {
-			updateBackgroundPreviewImage( );
+			if ( IJ.showMessageWithCancel("Proceed?","Data points in all sectors selected. Do you want to proceed?") ) {
+				IJ.log( " - calculating correction background!!" );
+				IJ.wait(10);
+				ImagePlus backgroundIMP = createBackgroundImage( imageTitle );
+				IJ.log( " - calculating corrected Image!!" );
+				createCorrectedImage(imageTitle, imp, backgroundIMP );
+				IJ.log( " - Plugin is done. You still can change selections to optimize the result." );
+			}
 		}
-		
 	}
 
 	public ImagePlus createBackgroundImage(	String imageTitle ) {
@@ -222,8 +223,8 @@ public class ManualBackgroundCorrection extends PlugInTool {
 		
 		String title = backgroundPreviewTitle;
 
-		int pWidth = (int)width/10;
-		int pHeight = (int)height/10;
+		int pWidth = 100;//(int)width/10;
+		int pHeight = 100;//(int)height/10;
 		
 		previewIMP = NewImage.createByteImage (title , pWidth, pHeight, 1, NewImage.FILL_WHITE);
 		previewIP = previewIMP.getProcessor();
